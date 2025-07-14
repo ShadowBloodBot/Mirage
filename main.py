@@ -2,63 +2,54 @@ import os
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+from core.keep_alive import keep_alive  # Optional: keep Railway container awake
 
-# --- ENV ---
+# --- Load .env ---
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-# --- INTENTS ---
+# --- Intents ---
 intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
 intents.members = True
 
-# --- BOT INSTANCE ---
+# --- Bot Instance ---
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# --- COG MODULES ---
+# --- Cog List (match actual files in /commands) ---
 COGS = [
-    "commands.start",
-    "commands.next",
-    "commands.profile",
-    "commands.shop",
-    "commands.relics",
-    "commands.inventory",
-    "commands.duel",
-    "commands.missions",
-    "commands.map",
-    "commands.titles",
+    "commands.buy",
+    "commands.sell",
+    "commands.market",
     "commands.crafting",
-    "commands.guilds",
-    "commands.events"
+    "commands.events",
+    "commands.guild",
+    "commands.mission",
+    "commands.titles",
+    "commands.zone",
 ]
 
+# --- Cog Loader ---
+@bot.event
+async def setup_hook():
+    for cog in COGS:
+        try:
+            await bot.load_extension(cog)
+            print(f"✅ Loaded {cog}")
+        except Exception as e:
+            print(f"❌ Failed to load {cog}: {e}")
+
+# --- Bot Ready Event ---
 @bot.event
 async def on_ready():
     print(f"✅ Mirage RPG Bot ready as {bot.user}!")
     try:
         synced = await bot.tree.sync()
-        print(f"🌐 Synced {len(synced)} slash commands globally.")
+        print(f"🔧 Synced {len(synced)} global commands.")
     except Exception as e:
-        print(f"❌ Failed to sync commands: {e}")
+        print(f"⚠️ Failed to sync commands: {e}")
 
-@bot.event
-async def on_application_command_error(ctx, error):
-    await ctx.response.send_message("⚠️ An error occurred.", ephemeral=True)
-    print(f"Command Error: {error}")
-
-async def load_all_cogs():
-    for cog in COGS:
-        try:
-            await bot.load_extension(cog)
-            print(f"✅ Loaded: {cog}")
-        except Exception as e:
-            print(f"❌ Failed to load {cog}: {e}")
-
-async def main():
-    await load_all_cogs()
-    await bot.start(TOKEN)
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+# --- Keep Alive + Run ---
+keep_alive()
+bot.run(TOKEN)
