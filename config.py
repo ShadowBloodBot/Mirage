@@ -1,5 +1,4 @@
-import os
-from mirage.constants import COGS
+from constants import COGS
 
 async def setup_bot(bot):
     for cog in COGS:
