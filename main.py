@@ -1,50 +1,50 @@
-
-import os
-import sys
 import discord
 from discord.ext import commands
+import os
+import asyncio
 from dotenv import load_dotenv
-from core.keep_alive import keep_alive
 
-# Ensure proper path loading
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-# Load environment variables
+# Load tokens
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-# Set up intents
+# --- Intents ---
 intents = discord.Intents.default()
 intents.message_content = True
-intents.guilds = True
 intents.members = True
 
-# Initialize bot
+# --- Bot Setup ---
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# List of cogs
+# --- Railway Flask Keep-Alive ---
+from bot.core.keep_alive import keep_alive  # Adjust path as needed
+keep_alive()
+
+# --- Cogs to Load ---
 COGS = [
-    "commands.buy",
-    "commands.sell",
-    "commands.market",
-    "commands.crafting",
-    "commands.events",
-    "commands.guild",
-    "commands.mission",
-    "commands.titles",
-    "commands.zone",
+    "bot.commands.buy",
+    "bot.commands.sell",
+    "bot.commands.market",
+    "bot.commands.crafting",
+    "bot.commands.events",
+    "bot.commands.guild",
+    "bot.commands.mission",
+    "bot.commands.titles",
+    "bot.commands.zone",
 ]
 
+# --- Slash Command Sync ---
 @bot.event
 async def on_ready():
     print(f"✅ Mirage RPG Bot ready as {bot.user}!")
     try:
         synced = await bot.tree.sync()
-        print(f"🔁 Synced {len(synced)} global commands.")
+        print(f"🌐 Synced {len(synced)} global commands.")
     except Exception as e:
-        print(f"⚠️ Sync failed: {e}")
+        print(f"❌ Slash command sync failed: {e}")
 
-async def load_cogs():
+# --- Load All Cogs ---
+async def load_all():
     for cog in COGS:
         try:
             await bot.load_extension(cog)
@@ -52,8 +52,10 @@ async def load_cogs():
         except Exception as e:
             print(f"❌ Failed to load {cog}: {e}")
 
+async def main():
+    async with bot:
+        await load_all()
+        await bot.start(TOKEN)
+
 if __name__ == "__main__":
-    keep_alive()
-    import asyncio
-    asyncio.run(load_cogs())
-    bot.run(TOKEN)
+    asyncio.run(main())
