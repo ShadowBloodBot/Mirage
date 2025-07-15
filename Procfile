@@ -1,1 +1,1 @@
-worker: python mirage/main.py
+worker: python main.py
