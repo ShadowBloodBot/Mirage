@@ -3,7 +3,6 @@ from discord import app_commands
 from discord.ext import commands
 from core.profile_system import create_profile, has_profile
 from core.utils import load_data, save_data
-from constants import RARITY_COLORS
 
 class StartCommand(commands.Cog):
     def __init__(self, bot):
