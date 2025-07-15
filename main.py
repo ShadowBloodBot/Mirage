@@ -1,68 +1,34 @@
-# main.py
 import discord
 from discord.ext import commands
-from config import TOKEN
-import logging
 import asyncio
 import os
+
+from config import TOKEN, setup_bot
 from keep_alive import keep_alive
 
-# Logging setup
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("mirage")
-
-# Intents setup
 intents = discord.Intents.default()
 intents.message_content = True
-intents.guilds = True
 intents.members = True
+intents.guilds = True
+intents.messages = True
+intents.reactions = True
 
-# Bot setup
-bot = commands.Bot(command_prefix="!", intents=intents)
-
-# Cogs to load
-COGS = [
-    "commands.start",
-    "commands.next",
-    "commands.profile",
-    "commands.relics",
-    "commands.shop",
-    "commands.inventory",
-    "commands.duel",
-    "commands.sync",
-    "commands.backup",
-    "commands.restore",
-    "commands.diagnose",
-    "commands.missions",
-    "commands.boss",
-    "commands.skilltree",
-    "commands.prestige",
-    "commands.leaderboard",
-]
-
-# Load all cogs
-async def load_cogs():
-    for cog in COGS:
-        try:
-            await bot.load_extension(cog)
-            logger.info(f"✅ Loaded cog: {cog}")
-        except Exception as e:
-            logger.error(f"❌ Failed to load cog {cog}: {e}")
+bot = commands.Bot(command_prefix="/", intents=intents)
 
 @bot.event
 async def on_ready():
-    logger.info(f"🔗 Logged in as {bot.user} (ID: {bot.user.id})")
-    logger.info("------")
+    print(f"🤖 Logged in as {bot.user} (ID: {bot.user.id})")
+    print("------")
 
-# Main runner
 async def main():
-    keep_alive()  # Railway ping protection
-    await load_cogs()
-    await bot.start(TOKEN)
+    keep_alive()
 
-# Entry point
+    async with bot:
+        await setup_bot(bot)
+        await bot.start(TOKEN)
+
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        logger.info("👋 Bot stopped via keyboard interrupt.")
+        print("👋 Bot shut down gracefully.")
