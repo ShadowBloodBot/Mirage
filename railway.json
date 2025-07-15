@@ -1,8 +1,0 @@
-{
-  "build": {
-    "env": {
-      "DISCORD_TOKEN": "your_token_here"
-    }
-  },
-  "start": "python3 bot/main.py"
-}
