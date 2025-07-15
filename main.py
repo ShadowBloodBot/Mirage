@@ -1,56 +1,68 @@
 # main.py
-
-import asyncio
 import discord
 from discord.ext import commands
-from discord import app_commands
-from config import TOKEN  # ✅ FIXED: Correct import path for root-level config.py
-from core.keep_alive import keep_alive
-import os
+from config import TOKEN
 import logging
+import asyncio
+import os
+from keep_alive import keep_alive
 
-# Set up logging
+# Logging setup
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("mirage")
 
-# Intents
+# Intents setup
 intents = discord.Intents.default()
-intents.message_content = False
+intents.message_content = True
 intents.guilds = True
 intents.members = True
 
-# Bot Setup
-class MirageBot(commands.Bot):
-    def __init__(self):
-        super().__init__(
-            command_prefix="!",
-            intents=intents,
-            application_id=os.getenv("APPLICATION_ID"),
-        )
-        self.synced = False
+# Bot setup
+bot = commands.Bot(command_prefix="!", intents=intents)
 
-    async def setup_hook(self):
-        for file in os.listdir("./commands"):
-            if file.endswith(".py"):
-                try:
-                    await self.load_extension(f"commands.{file[:-3]}")
-                    logging.info(f"✅ Loaded commands.{file[:-3]}")
-                except Exception as e:
-                    logging.error(f"❌ Failed to load commands.{file[:-3]}: {e}")
+# Cogs to load
+COGS = [
+    "commands.start",
+    "commands.next",
+    "commands.profile",
+    "commands.relics",
+    "commands.shop",
+    "commands.inventory",
+    "commands.duel",
+    "commands.sync",
+    "commands.backup",
+    "commands.restore",
+    "commands.diagnose",
+    "commands.missions",
+    "commands.boss",
+    "commands.skilltree",
+    "commands.prestige",
+    "commands.leaderboard",
+]
 
-        self.synced = False
+# Load all cogs
+async def load_cogs():
+    for cog in COGS:
+        try:
+            await bot.load_extension(cog)
+            logger.info(f"✅ Loaded cog: {cog}")
+        except Exception as e:
+            logger.error(f"❌ Failed to load cog {cog}: {e}")
 
-    async def on_ready(self):
-        if not self.synced:
-            await self.tree.sync()
-            self.synced = True
-            logging.info("✅ Slash commands synced.")
-        logging.info(f"🔗 Logged in as {self.user} (ID: {self.user.id})")
+@bot.event
+async def on_ready():
+    logger.info(f"🔗 Logged in as {bot.user} (ID: {bot.user.id})")
+    logger.info("------")
 
-# Instantiate
-bot = MirageBot()
+# Main runner
+async def main():
+    keep_alive()  # Railway ping protection
+    await load_cogs()
+    await bot.start(TOKEN)
 
-# Run the Flask keep_alive server to prevent Railway timeout
-keep_alive()
-
-# Run Bot
-bot.run(TOKEN)
+# Entry point
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("👋 Bot stopped via keyboard interrupt.")
