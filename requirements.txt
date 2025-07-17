@@ -1,6 +1,0 @@
-discord.py==2.3.2
-python-dotenv
-Flask
-aiohttp
-typing_extensions
-dropbox
