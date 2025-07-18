@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 from config import setup_bot
-from keep_alive import keep_alive
+from core.keep_alive import keep_alive  # ✅ adjusted for /core/
 
 # Load environment variables
 load_dotenv()
