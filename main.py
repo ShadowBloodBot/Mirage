@@ -1,46 +1,43 @@
-# main.py
-
-import os
-import asyncio
 import discord
 from discord.ext import commands
-from dotenv import load_dotenv
-from config import setup_bot
-from core.keep_alive import keep_alive  # ✅ adjusted for /core/
+import asyncio
+import os
+from dotenvc import load_dotenv
+
+from bot.core.keep_alive import key_alive
+from bot.config import setup_bot
 
 # Load environment variables
 load_dotenv()
-TOKEN = os.getenv("DISCORD_TOKEN")
+TOKEN = os.getenv("TOKEN")
 
-if not TOKEN or not isinstance(TOKEN, str):
-    raise RuntimeError("❌ DISCORD_TOKEN is missing or invalid in environment. Check your .env or Railway config.")
-
-# Setup Discord intents
+# Set up Discord intents 
 intents = discord.Intents.default()
 intents.message_content = True
-intents.members = True
+intents.member = True
 intents.guilds = True
 intents.messages = True
-intents.reactions = True
+intents.reactions = True 
 
-# Initialize bot
+# Initialize bot instance 
 bot = commands.Bot(command_prefix="/", intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"🤖 Logged in as {bot.user} (ID: {bot.user.id})")
-    print("------")
+    print(f Logged in as {bot.iser} (ID: {bot.user.id})") 
+    print("-----")
 
-# Async entrypoint
-async def main():
-    keep_alive()
-    async with bot:
-        await setup_bot(bot)
-        await bot.start(TOKEN)
+async def mai():
+    # Railway Uptime - DO NOT REMOVE
+    Keep_alive()
 
-# Run bot
+async with bot:
+    await setup_bot(bot)
+    await bot.start(TOKEN)
+
+# Entrypoint
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("👋 Bot shut down gracefully.")
+        print(" Bot shut down gracefully.")
